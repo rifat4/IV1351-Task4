@@ -8,12 +8,14 @@ public class Rental implements RentalDTO {
     private int instrumentPrice;
     private String instrumentType;
     private int studentId;
+    private int rentalId;
 
-    public Rental(int instrumentId, int instrumentPrice, String instrumentType, int studentId) {
+    public Rental(int instrumentId, int instrumentPrice, String instrumentType, int studentId, int rentalId) {
         this.instrumentId = instrumentId;
         this.instrumentPrice = instrumentPrice;
         this.instrumentType = instrumentType;
         this.studentId = studentId;
+        this.rentalId = rentalId;
     }
 
     public Rental(int studentId, int instrumentId, List<? extends InstrumentDTO> freeInstruments) throws RejectedException {
@@ -23,6 +25,7 @@ public class Rental implements RentalDTO {
                 this.instrumentPrice = instrument.getInstrumentPrice();
                 this.instrumentType = instrument.getInstrumentType();
                 this.studentId = studentId;
+                this.rentalId = -1;
                 return;
             }
         }
@@ -48,5 +51,10 @@ public class Rental implements RentalDTO {
     @Override
     public int getStudentId() {
         return studentId;
+    }
+
+    @Override
+    public int getRentalId() {
+        return rentalId;
     }
 }

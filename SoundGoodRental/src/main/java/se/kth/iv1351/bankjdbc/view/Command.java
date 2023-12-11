@@ -28,27 +28,34 @@ package se.kth.iv1351.bankjdbc.view;
  * Defines all commands that can be performed by a user of the chat application.
  */
 public enum Command {
+    /**
+    * Lists all instruments that are currently rented out.
+    */
     RENTED_INSTRUMENTS,
-    /**
-     * Lists all instruments that are currently rented out.
-     */
-    LIST_INSTRUMENTS,
-    /**
-     * Lists all commands.
-     */
 
-    RENT_INSTRUMENT,
+    /**
+     * Lists all available instruments
+     * the command available_instruments [INSTRUMENT NAME]
+     * lists all available instruments of type [INSTRUMENT NAME]
+     */
+    AVAILABLE_INSTRUMENTS,
+
     /**
      * Student i rents instrument j (example "rent_instrument 3 3")
      */
+    RENT_INSTRUMENT,
 
-    TERMINATE_RENTAL,
     /**
      * Terminates rental i, where i is "rental_id (example terminate_rental 3)"
      * 3 has to be an active rental
      */
+    TERMINATE_RENTAL,
 
+    /**
+     * Lists all commands.
+     */
     HELP,
+
     /**
      * Leave the chat application.
      */

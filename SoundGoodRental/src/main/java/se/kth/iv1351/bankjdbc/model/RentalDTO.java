@@ -35,4 +35,6 @@ public interface RentalDTO {
     public String getInstrumentType();
 
     public int getStudentId();
+
+    public int getRentalId();
 }

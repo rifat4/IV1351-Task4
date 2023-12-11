@@ -10,7 +10,6 @@ import java.util.List;
 public class RentalDAO {
 
     private static final String INSTRUMENT_DETAILS = "instrument_details";
-    private static final String HOLDER_PK_COLUMN_NAME = "holder_id";
     private static final String INSTRUMENT_TYPE_NAME = "name";
     private static final String INSTRUMENT_TABLE_NAME = "instruments";
     private static final String INSTRUMENT_BRAND = "brand";
@@ -25,6 +24,7 @@ public class RentalDAO {
     private static final String RENTAL_START_TIME = "rental_start_time";
     private static final String RENTED_INSTRUMENT_FK = "rented_instrument_id";
     private static final String STUDENT_FK = "student_id";
+    private static final String RENTAL_FK = "rented_instrument_id";
     private static final String NOW = "NOW()";
 
     Connection connection;
@@ -34,10 +34,12 @@ public class RentalDAO {
     private PreparedStatement terminateRentalStmt;
 
 
-
+    /**
+     * Creates a new DAO object and connects to the database.
+     */
     public RentalDAO() throws SoundgoodDBException {
         try {
-            connectToBankDB();
+            connectToSoundgoodDb();
             prepareStatements();
         } catch (ClassNotFoundException | SQLException exception) {
             throw new SoundgoodDBException("Could not connect to datasource.", exception);
@@ -45,16 +47,19 @@ public class RentalDAO {
     }
 
 
-
-    private void connectToBankDB() throws ClassNotFoundException, SQLException {
+    /**
+     * Connects to the database and
+     */
+    private void connectToSoundgoodDb() throws ClassNotFoundException, SQLException {
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/soundgoodtestview2",
                 "postgres", "Cb38j2zhw3A74c");
-        // connection =
-        // DriverManager.getConnection("jdbc:mysql://localhost:3306/bankdb",
-        // "mysql", "mysql");
         connection.setAutoCommit(false);
     }
 
+    /**
+     * Searches for all instruments that are currently rented
+     * @return a List with objects Instrument
+     */
     public List<? extends RentalDTO> findAllRentedInstruments() throws SoundgoodDBException {
         String failureMsg = "Could not list instruments.";
         List<Rental> instruments = new ArrayList<>();
@@ -63,7 +68,8 @@ public class RentalDAO {
                 instruments.add(new Rental(result.getInt(INSTRUMENT_FK),
                         result.getInt(INSTRUMENT_PRICE),
                         result.getString(INSTRUMENT_TYPE_NAME),
-                        result.getInt(STUDENT_FK)));
+                        result.getInt(STUDENT_FK),
+                        result.getInt(RENTAL_FK)));
             }
             connection.commit();
         } catch (SQLException sqle) {
@@ -72,6 +78,13 @@ public class RentalDAO {
         return instruments;
     }
 
+    /**
+     * Searches for all accounts whose holder has the specified name.
+     * @param student_id The students id
+     * @param instrument_id the instrument that is to be rented
+     *
+     * @throws SoundgoodDBException If failed to search for available instrument.
+     */
     public void createRental(int student_id, int instrument_id) throws SoundgoodDBException {
         String failureMsg = "Could not create rental.";
         ResultSet result = null;
@@ -91,6 +104,12 @@ public class RentalDAO {
         }
     }
 
+    /**
+     * Searches for all accounts whose holder has the specified name.
+     *
+     * @param rentalId The id of the rental
+     * @throws SoundgoodDBException If failed to terminate rental with rental_Id.
+     */
     public void terminateRental(int rentalId) {
         String failureMsg = "Could not delete rental. ";
         try{
@@ -108,6 +127,7 @@ public class RentalDAO {
     private void prepareStatements() throws SQLException {
         findAllRentedInstrumentsStmt = connection.prepareStatement("SELECT i."
                 + INSTRUMENT_FK + ", ids." + INSTRUMENT_PRICE + ", it." + INSTRUMENT_TYPE_NAME + ", ri." + STUDENT_FK
+                + ", ri." + RENTED_INSTRUMENT_FK
                 + " FROM " + INSTRUMENT_TABLE_NAME + " i INNER JOIN " + INSTRUMENT_TYPE_TABLE_NAME
                 + " it ON i." + INSTRUMENT_TYPE_FK + "=it." + INSTRUMENT_TYPE_FK
                 + " INNER JOIN " + INSTRUMENT_DETAILS_TABLE_NAME + " ids ON i." + INSTRUMENT_DETAILS_FK + "=ids." + INSTRUMENT_DETAILS_FK
@@ -123,7 +143,7 @@ public class RentalDAO {
 
         terminateRentalStmt = connection.prepareStatement(
                 "UPDATE " + RENTED_INSTRUMENT_TABLE_NAME + " SET " + RENTAL_END_TIME + "=" + NOW
-                + " WHERE " + RENTED_INSTRUMENT_FK + " = (?)");
+                + " WHERE " + RENTED_INSTRUMENT_FK + " = (?) AND RENTAL_END_TIME IS NULL" );
     }
 
     private void closeResultSet(String failureMsg, ResultSet result) throws SoundgoodDBException {

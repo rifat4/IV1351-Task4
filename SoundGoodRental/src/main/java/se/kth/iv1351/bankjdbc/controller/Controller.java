@@ -52,40 +52,24 @@ public class Controller {
     }
 
     /**
-     * Creates a new account for the specified account holder.
-     * 
-     * @param holderName The account holder's name.
-     * @throws InstrumentException If unable to create account.
-     */
-    public void createAccount(String holderName) throws InstrumentException {
-        String failureMsg = "Could not create account for: " + holderName;
-
-        if (holderName == null) {
-            throw new InstrumentException(failureMsg);
-        }
-
-        try {
-            instrumentDb.createAccount(new Instrument(holderName));
-        } catch (Exception e) {
-            throw new InstrumentException(failureMsg, e);
-        }
-    }
-
-    /**
      * Lists all non rented instruments in the schoolDB
      * 
-     * @return A list containing all free instruments, if the list is empty there are no
-     * free instruments.
+     * @return A list containing all available instruments, if the list is empty there are no
+     * available instruments.
      * @throws InstrumentException If unable to retrieve accounts.
      *
      * forUpdate = true if view is gotten for update
      */
-    public List<? extends InstrumentDTO> getAllFreeInstruments(boolean forUpdate) throws InstrumentException {
+    private List<? extends InstrumentDTO> getAllAvailableInstruments(boolean forUpdate) throws InstrumentException {
         try {
-            return instrumentDb.findAllFreeInstruments(forUpdate);
+            return instrumentDb.findAllAvilableInstruments(forUpdate);
         } catch (Exception e) {
-            throw new InstrumentException("Unable to list free instruments.", e);
+            throw new InstrumentException("Unable to list available instruments.", e);
         }
+    }
+
+    public List<? extends InstrumentDTO> getAllAvailableInstruments() throws InstrumentException {
+        return getAllAvailableInstruments(false);
     }
 
     public List<? extends RentalDTO> getAllRentedInstruments() throws InstrumentException {
@@ -97,7 +81,6 @@ public class Controller {
     }
 
     public void terminateRental(int rentalId) throws RejectedException {
-        String failureMsg = "Could not terminate rental: ";
         try {
             rentalDb.terminateRental(rentalId);
         } catch(Exception e){
@@ -120,22 +103,28 @@ public class Controller {
         }
 
         try {
-            return instrumentDb.findFreeInstrumentsOfType(instrumentType);
+            return instrumentDb.findAvailableInstrumentsOfType(instrumentType);
         } catch (Exception e) {
             throw new InstrumentException("Could not search for account.", e);
         }
     }
 
     public void rentInstrument(int studentId, int instrumentId) throws InstrumentException {
-        List<? extends InstrumentDTO> freeInstruments = getAllFreeInstruments(true);
+        List<? extends InstrumentDTO> availableInstruments = getAllAvailableInstruments(true);
         try {
-            instrumentDb.findAllFreeInstruments(true);
-            RentalDTO rental = new Rental(studentId, instrumentId, freeInstruments);
+            availableInstruments = instrumentDb.findAllAvilableInstruments(true);
+            int currentRentalCount = instrumentDb.findCountOfRentedInstrumentsForStudent(studentId);
+            if(currentRentalCount >= 2){
+                throw new RejectedException("Student already has 2 active rentals: " + this);
+            }
+            RentalDTO rental = new Rental(studentId, instrumentId, availableInstruments);
             rentalDb.createRental(rental.getStudentId(), rental.getInstrumentId());
         } catch (SoundgoodDBException | RejectedException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
     private void commitOngoingTransaction(String failureMsg) throws InstrumentException {

@@ -79,17 +79,18 @@ public class BlockingInterpreter {
                     case QUIT:
                         keepReceivingCmds = false;
                         break;
-                    case LIST_INSTRUMENTS:
+                    case AVAILABLE_INSTRUMENTS:
                         List<? extends InstrumentDTO> instruments = null;
                         if (cmdLine.getParameter(0).equals("")) {
-                            instruments = ctrl.getAllFreeInstruments(false);
+                            instruments = ctrl.getAllAvailableInstruments();
                         } else {
                             instruments = ctrl.getAllAvailableInstrumentType(cmdLine.getParameter(0));
                         }
                         for (InstrumentDTO instrument : instruments) {
                             System.out.println("Instrument Brand: " + instrument.getInstrumentBrand() + ", "
                                              + "Instrument Type: " + instrument.getInstrumentType() + ", "
-                                             + "Instrument Price: " + instrument.getInstrumentPrice());
+                                             + "Instrument Price: " + instrument.getInstrumentPrice() + ", "
+                                             + "Instrument ID: " + instrument.getInstrumentID());
                         }
                         break;
                     case RENTED_INSTRUMENTS:
@@ -97,13 +98,14 @@ public class BlockingInterpreter {
                         if (cmdLine.getParameter(0).equals("")) {
                             rentals = ctrl.getAllRentedInstruments();
                         } else {
-                            //rentals = ctrl.getAllFreeInstrumentType(cmdLine.getParameter(0));
+                            //rentals = ctrl.getAllAvailableInstrumentType(cmdLine.getParameter(0));
                         }
                         for (RentalDTO rental : rentals) {
                             System.out.println("Instrument ID: " + rental.getInstrumentId() + ", "
                                     + "Instrument Price: " + rental.getInstrumentPrice() + ", "
                                     + "Instrument Type: " + rental.getInstrumentType() + ", "
-                                    + "Student ID: " + rental.getStudentId());
+                                    + "Student ID: " + rental.getStudentId() + ", "
+                                    + " Rental ID: " + rental.getRentalId());
                         }
 
                         break;

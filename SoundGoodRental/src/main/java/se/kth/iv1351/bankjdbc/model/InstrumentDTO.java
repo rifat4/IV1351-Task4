@@ -28,19 +28,22 @@ package se.kth.iv1351.bankjdbc.model;
  */
 public interface InstrumentDTO {
     /**
-     * @return The account number.
+     * @return Brand of instrument
      */
     public String getInstrumentBrand();
 
     /**
-     * @return The balance.
+     * @return The rental price of instrument
      */
     public int getInstrumentPrice();
 
     /**
-     * @return The holder's name.
+     * @return Type of instrument
      */
     public String getInstrumentType();
 
+    /**
+     * @return unique id of instrument
+     */
     public int getInstrumentID();
 }

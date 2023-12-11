@@ -30,38 +30,14 @@ public class Instrument implements InstrumentDTO {
     private int instrumentPrice;
     private String instrumentType;
     private String instrumentBrand;
-
     private int instrumentID;
 
-    /**
-     * Creates an account for the specified holder with the balance zero. The account
-     * number is unspecified.
-     *
-     * @param instrumentType The account holder's holderName.
-     * @param bankDB     The DAO used to store updates to the database.
-     */
-    public Instrument(String instrumentType) {
-        this(null, instrumentType, 0, 0);
-    }
 
     /**
-     * Creates an account for the specified holder with the specified balance. The
-     * account number is unspecified.
-     *
-     * @param instrumentType The account holder's holderName.
-     * @param balance    The initial balance.
-     */
-    public Instrument(String instrumentType, int balance, int instrumentID) {
-        this(null, instrumentType, balance, instrumentID);
-    }
-
-    /**
-     * Creates an account for the specified holder with the specified instrumentPrice and account
-     * number.
-     *
-     * @param instrumentBrand     The account number.
-     * @param instrumentType The account holder's instrumentType.
-     * @param instrumentPrice    The initial instrumentPrice.
+     * Creates an instrument with same attributes as an instrument in the database
+     * @param instrumentBrand  Brand of instrument.
+     * @param instrumentType Type of instrument
+     * @param instrumentPrice  Rental price of the instrument.
      */
     public Instrument(String instrumentBrand, String instrumentType, int instrumentPrice, int instrumentID) {
         this.instrumentBrand = instrumentBrand;
@@ -71,77 +47,29 @@ public class Instrument implements InstrumentDTO {
     }
 
     /**
-     * @return The account number.
+     * @return Brand of instrument
      */
     public String getInstrumentBrand() {
         return instrumentBrand;
     }
 
     /**
-     * @return The balance.
+     * @return Price of instrument
      */
     public int getInstrumentPrice() {
         return instrumentPrice;
     }
 
     /**
-     * @return The holder's name.
+     * @return Type of instrument
      */
     public String getInstrumentType() {
         return instrumentType;
     }
 
+    /**
+     * @return The unique id of instrument
+     */
     public int getInstrumentID() {return instrumentID;}
 
-    /**
-     * Deposits the specified amount.
-     *
-     * @param amount The amount to deposit.
-     * @throws InstrumentException If the specified amount is negative, or if unable to
-     *                          perform the update.
-     */
-    public void deposit(int amount) throws RejectedException {
-        if (amount < 0) {
-            throw new RejectedException("Tried to deposit negative value, illegal value: "
-                                        + amount + ", account: " + this);
-        }
-        instrumentPrice = instrumentPrice + amount;
-    }
-
-    /**
-     * Withdraws the specified amount.
-     *
-     * @param amount The amount to withdraw.
-     * @throws InstrumentException If the specified amount is negative, if the amount
-     *                          is larger than the balance, or if unable to perform
-     *                          the update.
-     */
-    public void withdraw(int amount) throws RejectedException {
-        if (amount < 0) {
-            throw new RejectedException("Tried to withdraw negative value, illegal value: "
-                                        + amount + ", account: " + this);
-        }
-        if (instrumentPrice - amount < 0) {
-            throw new RejectedException("Overdraft attempt, illegal value: " + amount
-                                        + ", account: " + this);
-        }
-        instrumentPrice = instrumentPrice - amount;
-    }
-
-    /**
-     * @return A string representation of all fields in this object.
-     */
-    @Override
-    public String toString() {
-        StringBuilder stringRepresentation = new StringBuilder();
-        stringRepresentation.append("Account: [");
-        stringRepresentation.append("account number: ");
-        stringRepresentation.append(instrumentBrand);
-        stringRepresentation.append(", holder: ");
-        stringRepresentation.append(instrumentType);
-        stringRepresentation.append(", balance: ");
-        stringRepresentation.append(instrumentPrice);
-        stringRepresentation.append("]");
-        return stringRepresentation.toString();
-    }
 }

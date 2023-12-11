@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.kth.iv1351.bankjdbc.model.Instrument;
-import se.kth.iv1351.bankjdbc.model.InstrumentDTO;
 
 /**
  * This data access object (DAO) encapsulates all database calls in the bank
@@ -57,105 +56,21 @@ public class InstrumentDAO {
     private static final String STUDENT_FK = "student_id";
 
     private Connection connection;
-    private PreparedStatement createHolderStmt;
-    private PreparedStatement findHolderPKStmt;
-    private PreparedStatement createAccountStmt;
-    private PreparedStatement findFreeInstrumentOfTypeStmt;
-    private PreparedStatement findAccountByAcctNoStmt;
-    private PreparedStatement findAccountByAcctNoStmtLockingForUpdate;
-    private PreparedStatement findAllFreeInstrumentsStmt;
-    private PreparedStatement deleteAccountStmt;
-    private PreparedStatement changeBalanceStmt;
+    private PreparedStatement findAvailableInstrumentOfTypeStmt;
+    private PreparedStatement findAllAvailableInstrumentsStmt;
+    private PreparedStatement findAllAvailableInstrumentsForUpdateStmt;
+    private PreparedStatement findCountOfRentedInstrumentsForStudentStmt;
 
     /**
      * Constructs a new DAO object connected to the bank database.
      */
     public InstrumentDAO() throws SoundgoodDBException {
         try {
-            connectToBankDB();
+            connectToSoundgoodDb();
             prepareStatements();
         } catch (ClassNotFoundException | SQLException exception) {
             throw new SoundgoodDBException("Could not connect to datasource.", exception);
         }
-    }
-
-    /**
-     * Creates a new account.
-     *
-     * @param account The account to create.
-     * @throws SoundgoodDBException If failed to create the specified account.
-     */
-    public void createAccount(InstrumentDTO account) throws SoundgoodDBException {
-        String failureMsg = "Could not create the account: " + account;
-        int updatedRows = 0;
-        try {
-            int holderPK = findHolderPKByName(account.getInstrumentType());
-            if (holderPK == 0) {
-                createHolderStmt.setString(1, account.getInstrumentType());
-                updatedRows = createHolderStmt.executeUpdate();
-                if (updatedRows != 1) {
-                    handleException(failureMsg, null);
-                }
-                holderPK = findHolderPKByName(account.getInstrumentType());
-            }
-
-            createAccountStmt.setInt(1, createAccountNo());
-            createAccountStmt.setInt(2, account.getInstrumentPrice());
-            createAccountStmt.setInt(3, holderPK);
-            updatedRows = createAccountStmt.executeUpdate();
-            if (updatedRows != 1) {
-                handleException(failureMsg, null);
-            }
-
-            connection.commit();
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
-        }
-    }
-
-    /**
-     * Searches for the account with the specified account number.
-     *
-     * @param acctNo        The account number.
-     * @param lockExclusive If true, it will not be possible to perform UPDATE
-     *                      or DELETE statements on the selected row in the
-     *                      current transaction. Also, the transaction will not
-     *                      be committed when this method returns. If false, no
-     *                      exclusive locks will be created, and the transaction
-     *                      will be committed when this method returns.
-     * @return The account with the specified account number, or <code>null</code>
-     *         if there is no such account.
-     * @throws SoundgoodDBException If failed to search for the account.
-     */
-    public Instrument findAccountByAcctNo(String acctNo, boolean lockExclusive)
-            throws SoundgoodDBException {
-        PreparedStatement stmtToExecute;
-        if (lockExclusive) {
-            stmtToExecute = findAccountByAcctNoStmtLockingForUpdate;
-        } else {
-            stmtToExecute = findAccountByAcctNoStmt;
-        }
-
-        String failureMsg = "Could not search for specified account.";
-        ResultSet result = null;
-        try {
-            stmtToExecute.setString(1, acctNo);
-            result = stmtToExecute.executeQuery();
-            if (result.next()) {
-                return new Instrument(result.getString(INSTRUMENT_BRAND),
-                        result.getString(INSTRUMENT_TYPE_NAME),
-                        result.getInt(INSTRUMENT_PRICE),
-                        result.getInt(INSTRUMENT_FK));
-            }
-            if (!lockExclusive) {
-                connection.commit();
-            }
-        } catch (SQLException sqle) {
-            handleException(failureMsg, sqle);
-        } finally {
-            closeResultSet(failureMsg, result);
-        }
-        return null;
     }
 
     /**
@@ -166,13 +81,13 @@ public class InstrumentDAO {
      *         the list is empty if there are no such account.
      * @throws SoundgoodDBException If failed to search for accounts.
      */
-    public List<Instrument> findFreeInstrumentsOfType(String instrumentType) throws SoundgoodDBException {
-        String failureMsg = "Could not search for specified accounts.";
+    public List<Instrument> findAvailableInstrumentsOfType(String instrumentType) throws SoundgoodDBException {
+        String failureMsg = "Could not search for specified instrument.";
         ResultSet result = null;
         List<Instrument> accounts = new ArrayList<>();
         try {
-            findFreeInstrumentOfTypeStmt.setString(1, instrumentType);
-            result = findFreeInstrumentOfTypeStmt.executeQuery();
+            findAvailableInstrumentOfTypeStmt.setString(1, instrumentType);
+            result = findAvailableInstrumentOfTypeStmt.executeQuery();
             while (result.next()) {
                 accounts.add(new Instrument(result.getString(INSTRUMENT_BRAND),
                         result.getString(INSTRUMENT_TYPE_NAME),
@@ -189,17 +104,15 @@ public class InstrumentDAO {
     }
 
     /**
-     * Retrieves all existing accounts.
-     *
      * @return A list with all existing accounts. The list is empty if there are no
      *         accounts.
      * @throws SoundgoodDBException If failed to search for accounts.
      */
-    public List<Instrument> findAllFreeInstruments(boolean forUpdate) throws SoundgoodDBException {
+    public List<Instrument> findAllAvilableInstruments(boolean forUpdate) throws SoundgoodDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
         if(forUpdate){
-            try (ResultSet result = findAllFreeInstrumentsStmt.executeQuery()) {
+            try (ResultSet result = findAllAvailableInstrumentsForUpdateStmt.executeQuery()) {
                 while (result.next()) {
                     instruments.add(new Instrument(result.getString(INSTRUMENT_BRAND),
                             result.getString(INSTRUMENT_TYPE_NAME),
@@ -210,7 +123,7 @@ public class InstrumentDAO {
                 handleException(failureMsg, sqle);
             }
         } else {
-            try (ResultSet result = findAllFreeInstrumentsStmt.executeQuery()) {
+            try (ResultSet result = findAllAvailableInstrumentsStmt.executeQuery()) {
                 while (result.next()) {
                     instruments.add(new Instrument(result.getString(INSTRUMENT_BRAND),
                             result.getString(INSTRUMENT_TYPE_NAME),
@@ -226,6 +139,23 @@ public class InstrumentDAO {
     }
 
     /**
+     * @return Count of active rentals studentId has
+     * @throws SoundgoodDBException If failed to search for accounts.
+     */
+    public int findCountOfRentedInstrumentsForStudent(int studentId) throws SoundgoodDBException {
+        String failureMsg = "Failed to get count of active rentals that " + studentId + " has: ";
+        int count = -1;
+        try{
+            ResultSet result = findCountOfRentedInstrumentsForStudentStmt.executeQuery();
+            result.next();
+            count = result.getInt(1);
+        } catch (SQLException e) {
+            handleException(failureMsg,e);
+        }
+        return count;
+    }
+
+    /**
      * Commits the current transaction.
      * 
      * @throws SoundgoodDBException If unable to commit the current transaction.
@@ -238,50 +168,63 @@ public class InstrumentDAO {
         }
     }
 
-    private void connectToBankDB() throws ClassNotFoundException, SQLException {
+    private void connectToSoundgoodDb() throws ClassNotFoundException, SQLException {
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/soundgoodtestview2",
                 "postgres", "Cb38j2zhw3A74c");
-        // connection =
-        // DriverManager.getConnection("jdbc:mysql://localhost:3306/bankdb",
-        // "mysql", "mysql");
         connection.setAutoCommit(false);
     }
 
     private void prepareStatements() throws SQLException {
-        createHolderStmt = connection.prepareStatement("INSERT INTO " + INSTRUMENT_DETAILS
-                + "(" + INSTRUMENT_TYPE_NAME + ") VALUES (?)");
-
-        createAccountStmt = connection.prepareStatement("INSERT INTO " + INSTRUMENT_TABLE_NAME
-                + "(" + INSTRUMENT_BRAND + ", " + INSTRUMENT_PRICE + ", "
-                + INSTRUMENT_TYPE_FK + ") VALUES (?, ?, ?)");
 
         /**
-        findFreeInstrumentOfType = connection.prepareStatement("SELECT ids." + INSTRUMENT_BRAND
+        findAvailableInstrumentOfType = connection.prepareStatement("SELECT ids." + INSTRUMENT_BRAND
                 + ", ids." + INSTRUMENT_PRICE + ", it." + INSTRUMENT_TYPE_NAME + " from "
                 + INSTRUMENT_TABLE_NAME + " i INNER JOIN "
                 + INSTRUMENT_DETAILS + " ids ON i." + INSTRUMENT_TYPE_FK
                 + " = ids." + INSTRUMENT_TYPE_FK + " WHERE h." + INSTRUMENT_TYPE_NAME + " = ?");
          **/
 
-        findFreeInstrumentOfTypeStmt = connection.prepareStatement("SELECT ids." + INSTRUMENT_BRAND
-                + ", ids." + INSTRUMENT_PRICE + ", it." + INSTRUMENT_TYPE_NAME + " from " + INSTRUMENT_TABLE_NAME +
-                " i INNER JOIN " + INSTRUMENT_DETAILS_TABLE_NAME + " ids ON i." + INSTRUMENT_DETAILS_FK + "=ids." +
-                INSTRUMENT_DETAILS_FK + " INNER JOIN " + INSTRUMENT_TYPE_TABLE_NAME + " it ON i." + INSTRUMENT_TYPE_FK
-        + "=it" + INSTRUMENT_TYPE_FK);
 
-        findAllFreeInstrumentsStmt = connection.prepareStatement("SELECT ids." + INSTRUMENT_BRAND
+
+        findAvailableInstrumentOfTypeStmt = connection.prepareStatement("SELECT t1.instrument_id, it.name, ids.brand, ids.price\n" +
+                "FROM instruments AS t1\n" +
+                "LEFT JOIN instrument_type AS it ON t1.instrument_type_id = it.instrument_type_id\n" +
+                "LEFT JOIN instrument_details AS ids ON t1.instrument_details_id = ids.instrument_details_id\n" +
+                "LEFT JOIN rented_instrument AS ri ON t1.instrument_id = ri.instrument_id AND ri.rental_end_time IS NULL\n" +
+                "WHERE ri.instrument_id IS NULL AND LOWER(it.name) = LOWER((?));\n");
+
+
+        /**
+        findAllAvailableInstrumentsStmt = connection.prepareStatement("SELECT ids." + INSTRUMENT_BRAND
                 + ", ids." + INSTRUMENT_PRICE + ", it." + INSTRUMENT_TYPE_NAME + ", i." + INSTRUMENT_FK + " from " + INSTRUMENT_TABLE_NAME +
                 " i INNER JOIN " + INSTRUMENT_DETAILS_TABLE_NAME + " ids ON i." + INSTRUMENT_DETAILS_FK + "=ids." +
                 INSTRUMENT_DETAILS_FK + " INNER JOIN " + INSTRUMENT_TYPE_TABLE_NAME + " it ON i." + INSTRUMENT_TYPE_FK
                 + "=it." + INSTRUMENT_TYPE_FK + " LEFT JOIN " + RENTED_INSTRUMENT_TABLE_NAME + " ri ON i." +
                 INSTRUMENT_FK + "=ri." + INSTRUMENT_FK + " WHERE " + RENTAL_END_TIME + " IS NULL AND " +
                 RENTAL_START_TIME + " IS NULL ");
+         **/
 
-        changeBalanceStmt = connection.prepareStatement("UPDATE " + INSTRUMENT_TABLE_NAME
-                + " SET " + INSTRUMENT_PRICE + " = ? WHERE " + INSTRUMENT_BRAND + " = ? ");
+        findAllAvailableInstrumentsStmt = connection.prepareStatement("SELECT t1.instrument_id, it.name, ids.brand, ids.price\n" +
+                "FROM instruments AS t1\n" +
+                "LEFT JOIN instrument_type AS it ON t1.instrument_type_id = it.instrument_type_id\n" +
+                "LEFT JOIN instrument_details AS ids ON t1.instrument_details_id = ids.instrument_details_id\n" +
+                "LEFT JOIN rented_instrument AS ri ON t1.instrument_id = ri.instrument_id AND ri.rental_end_time IS NULL\n" +
+                "WHERE ri.instrument_id IS NULL;\n");
 
-        deleteAccountStmt = connection.prepareStatement("DELETE FROM " + INSTRUMENT_TABLE_NAME
-                + " WHERE " + INSTRUMENT_BRAND + " = ?");
+        findAllAvailableInstrumentsForUpdateStmt = connection.prepareStatement("WITH cte AS (\n" +
+                "  SELECT t1.instrument_id, it.name, ids.brand, ids.price\n" +
+                "  FROM instruments AS t1\n" +
+                "  LEFT JOIN instrument_type AS it ON t1.instrument_type_id = it.instrument_type_id\n" +
+                "  LEFT JOIN instrument_details AS ids ON t1.instrument_details_id = ids.instrument_details_id\n" +
+                "  LEFT JOIN rented_instrument AS ri ON t1.instrument_id = ri.instrument_id AND ri.rental_end_time IS NULL\n" +
+                "  WHERE ri.instrument_id IS NULL\n" +
+                ")\n" +
+                "SELECT * FROM cte\n" +
+                "FOR UPDATE");
+
+        findCountOfRentedInstrumentsForStudentStmt = connection.prepareStatement(
+                "SELECT COUNT(*) AS count FROM rented_instrument ri\n" +
+                 "WHERE ri.student_id = 1 AND rental_end_time IS NULL");
     }
 
     private void handleException(String failureMsg, Exception cause) throws SoundgoodDBException {
@@ -307,19 +250,4 @@ public class InstrumentDAO {
             throw new SoundgoodDBException(failureMsg + " Could not close result set.", e);
         }
     }
-
-    private int createAccountNo() {
-        return (int) Math.floor(Math.random() * Integer.MAX_VALUE);
-    }
-
-    private int findHolderPKByName(String holderName) throws SQLException {
-        ResultSet result = null;
-        findHolderPKStmt.setString(1, holderName);
-        result = findHolderPKStmt.executeQuery();
-        if (result.next()) {
-            return result.getInt(HOLDER_PK_COLUMN_NAME);
-        }
-        return 0;
-    }
-
 }
