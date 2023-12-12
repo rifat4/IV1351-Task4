@@ -113,19 +113,12 @@ public class Controller {
         List<? extends InstrumentDTO> availableInstruments = getAllAvailableInstruments(true);
         try {
             availableInstruments = instrumentDb.findAllAvilableInstruments(true);
-            int currentRentalCount = instrumentDb.findCountOfRentedInstrumentsForStudent(studentId);
-            if(currentRentalCount >= 2){
-                throw new RejectedException("Student already has 2 active rentals: " + this);
-            }
             RentalDTO rental = new Rental(studentId, instrumentId, availableInstruments);
             rentalDb.createRental(rental.getStudentId(), rental.getInstrumentId());
         } catch (SoundgoodDBException | RejectedException e) {
             throw new RuntimeException(e);
         }
     }
-
-
-
 
     private void commitOngoingTransaction(String failureMsg) throws InstrumentException {
         try {
