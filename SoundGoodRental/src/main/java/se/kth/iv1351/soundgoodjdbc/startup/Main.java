@@ -22,11 +22,11 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.startup;
+package se.kth.iv1351.soundgoodjdbc.startup;
 
-import se.kth.iv1351.bankjdbc.controller.Controller;
-import se.kth.iv1351.bankjdbc.integration.SoundgoodDBException;
-import se.kth.iv1351.bankjdbc.view.BlockingInterpreter;
+import se.kth.iv1351.soundgoodjdbc.controller.Controller;
+import se.kth.iv1351.soundgoodjdbc.integration.SoundgoodDBException;
+import se.kth.iv1351.soundgoodjdbc.view.BlockingInterpreter;
 
 /**
  * Starts the bank client.

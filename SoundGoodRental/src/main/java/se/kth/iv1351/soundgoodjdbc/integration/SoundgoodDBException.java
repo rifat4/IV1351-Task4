@@ -21,19 +21,19 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.soundgoodjdbc.integration;
 
 /**
- * Thrown when create, read or delete of an account fails.
+ * Thrown when a call to the bank database fails.
  */
-public class InstrumentException extends Exception {
+public class SoundgoodDBException extends Exception {
 
     /**
      * Create a new instance thrown because of the specified reason.
      *
      * @param reason Why the exception was thrown.
      */
-    public InstrumentException(String reason) {
+    public SoundgoodDBException(String reason) {
         super(reason);
     }
 
@@ -43,7 +43,7 @@ public class InstrumentException extends Exception {
      * @param reason    Why the exception was thrown.
      * @param rootCause The exception that caused this exception to be thrown.
      */
-    public InstrumentException(String reason, Throwable rootCause) {
+    public SoundgoodDBException(String reason, Throwable rootCause) {
         super(reason, rootCause);
     }
 }

@@ -21,15 +21,15 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.controller;
+package se.kth.iv1351.soundgoodjdbc.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import se.kth.iv1351.bankjdbc.integration.InstrumentDAO;
-import se.kth.iv1351.bankjdbc.integration.SoundgoodDBException;
-import se.kth.iv1351.bankjdbc.integration.RentalDAO;
-import se.kth.iv1351.bankjdbc.model.*;
+import se.kth.iv1351.soundgoodjdbc.integration.InstrumentDAO;
+import se.kth.iv1351.soundgoodjdbc.integration.SoundgoodDBException;
+import se.kth.iv1351.soundgoodjdbc.integration.RentalDAO;
+import se.kth.iv1351.soundgoodjdbc.model.*;
 
 /**
  * This is the application's only controller, all calls to the model pass here.
@@ -62,7 +62,7 @@ public class Controller {
      */
     private List<? extends InstrumentDTO> getAllAvailableInstruments(boolean forUpdate) throws InstrumentException {
         try {
-            return instrumentDb.findAllAvilableInstruments(forUpdate);
+            return instrumentDb.findAllAvailableInstruments(forUpdate);
         } catch (Exception e) {
             throw new InstrumentException("Unable to list available instruments.", e);
         }
@@ -82,7 +82,7 @@ public class Controller {
 
     public void terminateRental(int rentalId) throws RejectedException {
         try {
-            rentalDb.terminateRental(rentalId);
+            rentalDb.updateRental(rentalId);
         } catch(Exception e){
             throw new RejectedException("Unable to terminate rental. ", e);
         }
@@ -112,7 +112,7 @@ public class Controller {
     public void rentInstrument(int studentId, int instrumentId) throws InstrumentException {
         List<? extends InstrumentDTO> availableInstruments = getAllAvailableInstruments(true);
         try {
-            availableInstruments = instrumentDb.findAllAvilableInstruments(true);
+            availableInstruments = instrumentDb.findAllAvailableInstruments(true);
             RentalDTO rental = new Rental(studentId, instrumentId, availableInstruments);
             rentalDb.createRental(rental.getStudentId(), rental.getInstrumentId());
         } catch (SoundgoodDBException | RejectedException e) {

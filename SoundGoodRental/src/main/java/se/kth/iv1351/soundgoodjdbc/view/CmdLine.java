@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.view;
+package se.kth.iv1351.soundgoodjdbc.view;
 
 /**
  * One line of user input, which should be a command and parameters associated

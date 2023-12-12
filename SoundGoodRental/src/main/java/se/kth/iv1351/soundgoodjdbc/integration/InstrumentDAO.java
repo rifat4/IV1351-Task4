@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.integration;
+package se.kth.iv1351.soundgoodjdbc.integration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.kth.iv1351.bankjdbc.model.Instrument;
+import se.kth.iv1351.soundgoodjdbc.model.Instrument;
 
 /**
  * This data access object (DAO) encapsulates all database calls in the bank
@@ -108,7 +108,7 @@ public class InstrumentDAO {
      *         accounts.
      * @throws SoundgoodDBException If failed to search for accounts.
      */
-    public List<Instrument> findAllAvilableInstruments(boolean forUpdate) throws SoundgoodDBException {
+    public List<Instrument> findAllAvailableInstruments(boolean forUpdate) throws SoundgoodDBException {
         String failureMsg = "Could not list instruments.";
         List<Instrument> instruments = new ArrayList<>();
         if(forUpdate){
@@ -136,23 +136,6 @@ public class InstrumentDAO {
             }
         }
         return instruments;
-    }
-
-    /**
-     * @return Count of active rentals studentId has
-     * @throws SoundgoodDBException If failed to search for accounts.
-     */
-    public int findCountOfRentedInstrumentsForStudent(int studentId) throws SoundgoodDBException {
-        String failureMsg = "Failed to get count of active rentals that " + studentId + " has: ";
-        int count = -1;
-        try{
-            ResultSet result = findCountOfRentedInstrumentsForStudentStmt.executeQuery();
-            result.next();
-            count = result.getInt(1);
-        } catch (SQLException e) {
-            handleException(failureMsg,e);
-        }
-        return count;
     }
 
     /**

@@ -1,7 +1,7 @@
-package se.kth.iv1351.bankjdbc.integration;
+package se.kth.iv1351.soundgoodjdbc.integration;
 
-import se.kth.iv1351.bankjdbc.model.Rental;
-import se.kth.iv1351.bankjdbc.model.RentalDTO;
+import se.kth.iv1351.soundgoodjdbc.model.Rental;
+import se.kth.iv1351.soundgoodjdbc.model.RentalDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -110,7 +110,7 @@ public class RentalDAO {
      * @param rentalId The id of the rental
      * @throws SoundgoodDBException If failed to terminate rental with rental_Id.
      */
-    public void terminateRental(int rentalId) {
+    public void updateRental(int rentalId) {
         String failureMsg = "Could not delete rental. ";
         try{
             terminateRentalStmt.setInt(1, rentalId);

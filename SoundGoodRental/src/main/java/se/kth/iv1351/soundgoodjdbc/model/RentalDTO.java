@@ -21,29 +21,20 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
  * Specifies a read-only view of an account.
  */
-public interface InstrumentDTO {
-    /**
-     * @return Brand of instrument
-     */
-    public String getInstrumentBrand();
+public interface RentalDTO {
 
-    /**
-     * @return The rental price of instrument
-     */
+    public int getInstrumentId();
+
     public int getInstrumentPrice();
 
-    /**
-     * @return Type of instrument
-     */
     public String getInstrumentType();
 
-    /**
-     * @return unique id of instrument
-     */
-    public int getInstrumentID();
+    public int getStudentId();
+
+    public int getRentalId();
 }

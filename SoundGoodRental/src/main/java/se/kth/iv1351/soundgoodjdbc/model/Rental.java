@@ -1,4 +1,4 @@
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.soundgoodjdbc.model;
 
 import java.util.List;
 

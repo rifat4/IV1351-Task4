@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.model;
+package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
  * An account in the bank.

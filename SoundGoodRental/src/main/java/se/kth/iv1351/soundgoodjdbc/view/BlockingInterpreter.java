@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  */
 
-package se.kth.iv1351.bankjdbc.view;
+package se.kth.iv1351.soundgoodjdbc.view;
 
 import java.util.List;
 import java.util.Scanner;
 
-import se.kth.iv1351.bankjdbc.controller.Controller;
-import se.kth.iv1351.bankjdbc.model.InstrumentDTO;
-import se.kth.iv1351.bankjdbc.model.RentalDTO;
+import se.kth.iv1351.soundgoodjdbc.controller.Controller;
+import se.kth.iv1351.soundgoodjdbc.model.InstrumentDTO;
+import se.kth.iv1351.soundgoodjdbc.model.RentalDTO;
 
 /**
  * Reads and interprets user commands. This command interpreter is blocking, the user
