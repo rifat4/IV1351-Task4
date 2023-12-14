@@ -24,7 +24,7 @@
 package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
- * Thrown when create, read or delete of an account fails.
+ * Thrown when read or delete of an instrument fails.
  */
 public class InstrumentException extends Exception {
 

@@ -29,7 +29,7 @@ import se.kth.iv1351.soundgoodjdbc.integration.SoundgoodDBException;
 import se.kth.iv1351.soundgoodjdbc.view.BlockingInterpreter;
 
 /**
- * Starts the bank client.
+ * Starts the client.
  */
 public class Main {
     /**
@@ -39,7 +39,7 @@ public class Main {
         try {
         new BlockingInterpreter(new Controller()).handleCmds();
         } catch(SoundgoodDBException bdbe) {
-            System.out.println("Could not connect to Bank db.");
+            System.out.println("Could not connect to Soundgood db.");
             bdbe.printStackTrace();
         }
     }

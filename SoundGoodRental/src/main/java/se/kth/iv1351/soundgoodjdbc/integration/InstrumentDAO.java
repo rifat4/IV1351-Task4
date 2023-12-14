@@ -35,7 +35,7 @@ import se.kth.iv1351.soundgoodjdbc.model.Instrument;
 import se.kth.iv1351.soundgoodjdbc.model.InstrumentException;
 
 /**
- * This data access object (DAO) encapsulates all database calls in the bank
+ * This data access object (DAO) encapsulates all instrument calls in the Soundgood management
  * application. No code outside this class shall have any knowledge about the
  * database.
  */
@@ -79,22 +79,22 @@ public class InstrumentDAO {
     }
 
     /**
-     * Searches for all accounts whose holder has the specified name.
+     * Searches for all instruments of specific type
      *
-     * @param instrumentType The account holder's name
-     * @return A list with all accounts whose holder has the specified name,
-     *         the list is empty if there are no such account.
-     * @throws SoundgoodDBException If failed to search for accounts.
+     * @param instrumentType The instrument type
+     * @return A list with all inistruments whose holder has the specified type,
+     *         the list is empty if there are no such instruments.
+     * @throws SoundgoodDBException If failed to search for instruments.
      */
     public List<Instrument> findAvailableInstrumentsOfType(String instrumentType) throws SoundgoodDBException {
         String failureMsg = "Could not search for specified instrument.";
         ResultSet result = null;
-        List<Instrument> accounts = new ArrayList<>();
+        List<Instrument> instruments = new ArrayList<>();
         try {
             findAvailableInstrumentOfTypeStmt.setString(1, instrumentType);
             result = findAvailableInstrumentOfTypeStmt.executeQuery();
             while (result.next()) {
-                accounts.add(new Instrument(result.getString(INSTRUMENT_BRAND),
+                instruments.add(new Instrument(result.getString(INSTRUMENT_BRAND),
                         result.getString(INSTRUMENT_TYPE_NAME),
                         result.getInt(INSTRUMENT_PRICE),
                         result.getInt(INSTRUMENT_K)));
@@ -105,13 +105,13 @@ public class InstrumentDAO {
         } finally {
             closeResultSet(failureMsg, result);
         }
-        return accounts;
+        return instruments;
     }
 
     /**
-     * @return A list with all existing accounts. The list is empty if there are no
-     *         accounts.
-     * @throws SoundgoodDBException If failed to search for accounts.
+     * @return A list with all existing instruments. The list is empty if there are no
+     *         instruments.
+     * @throws SoundgoodDBException If failed to search for instruments.
      */
     public List<Instrument> findAllAvailableInstruments(boolean forUpdate) throws SoundgoodDBException {
         String failureMsg = "Could not list instruments.";

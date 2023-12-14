@@ -24,7 +24,7 @@
 package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
- * Thrown when renting an instrument is rejefcted
+ * Thrown when renting an instrument is rejected
  */
 public class RejectedException extends Exception {
 

@@ -30,6 +30,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This data access object (DAO) encapsulates all rental calls in the Soundgood management
+ * application. No code outside this class shall have any knowledge about the
+ * database.
+ */
 public class RentalDAO {
 
     private static final String INSTRUMENT_TYPE_NAME = "name";
@@ -100,7 +105,7 @@ public class RentalDAO {
     }
 
     /**
-     * Searches for all accounts whose holder has the specified name.
+     * Searches creates a new rental with student and instrument ID
      * @param student_id The students id
      * @param instrument_id the instrument that is to be rented
      *
@@ -126,7 +131,7 @@ public class RentalDAO {
     }
 
     /**
-     * Searches for all accounts whose holder has the specified name.
+     * Updates the rental to show that it has been terminated
      *
      * @param rentalId The id of the rental
      * @throws SoundgoodDBException If failed to terminate rental with rental_Id.

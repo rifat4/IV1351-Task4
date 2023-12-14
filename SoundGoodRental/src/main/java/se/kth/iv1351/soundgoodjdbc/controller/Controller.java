@@ -56,7 +56,7 @@ public class Controller {
      *
      * @return A list containing all available instruments, if the list is empty there are no
      * available instruments.
-     * @throws InstrumentException If unable to retrieve accounts.
+     * @throws InstrumentException If unable to retrieve instruments.
      * value true if view is gotten for update
      */
     public List<? extends InstrumentDTO> getAllAvailableInstruments() throws InstrumentException {
@@ -72,7 +72,7 @@ public class Controller {
      *
      * @return A list containing all instruments that are currently rented out, if the list is empty there are no
      * rented instruments.
-     * @throws InstrumentException If unable to retrieve accounts.
+     * @throws InstrumentException If unable to retrieve instruments.
      *
      */
     public List<? extends RentalDTO> getAllRentedInstruments() throws InstrumentException {
@@ -111,7 +111,7 @@ public class Controller {
         try {
             return instrumentDb.findAvailableInstrumentsOfType(instrumentType);
         } catch (Exception e) {
-            throw new InstrumentException("Could not search for account.", e);
+            throw new InstrumentException("Could not search for instruments .", e);
         }
     }
 
@@ -121,6 +121,7 @@ public class Controller {
      * @param studentId the id of the student
      * @param instrumentId the id of the instrument to be rented
      * @throws RejectedException If unable to rent instrument.
+     * @throws SoundgoodDBException If we get a database exception.
      */
     public void rentInstrument(int studentId, int instrumentId) throws RejectedException, SoundgoodDBException {
         List<? extends InstrumentDTO> availableInstruments;

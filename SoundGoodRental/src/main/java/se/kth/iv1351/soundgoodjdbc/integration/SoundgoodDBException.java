@@ -24,7 +24,7 @@
 package se.kth.iv1351.soundgoodjdbc.integration;
 
 /**
- * Thrown when a call to the bank database fails.
+ * Thrown when a call to the Soundgood database fails.
  */
 public class SoundgoodDBException extends Exception {
 
