@@ -53,25 +53,28 @@ public class Controller {
 
     /**
      * Lists all non rented instruments in the schoolDB
-     * 
+     *
      * @return A list containing all available instruments, if the list is empty there are no
      * available instruments.
      * @throws InstrumentException If unable to retrieve accounts.
-     *
-     * forUpdate = true if view is gotten for update
+     * value true if view is gotten for update
      */
-    private List<? extends InstrumentDTO> getAllAvailableInstruments(boolean forUpdate) throws InstrumentException {
+    public List<? extends InstrumentDTO> getAllAvailableInstruments() throws InstrumentException {
         try {
-            return instrumentDb.findAllAvailableInstruments(forUpdate);
+            return instrumentDb.findAllAvailableInstruments(false);
         } catch (Exception e) {
             throw new InstrumentException("Unable to list available instruments.", e);
         }
     }
 
-    public List<? extends InstrumentDTO> getAllAvailableInstruments() throws InstrumentException {
-        return getAllAvailableInstruments(false);
-    }
-
+    /**
+     * Lists all non rented instruments in the schoolDB
+     *
+     * @return A list containing all instruments that are currently rented out, if the list is empty there are no
+     * rented instruments.
+     * @throws InstrumentException If unable to retrieve accounts.
+     *
+     */
     public List<? extends RentalDTO> getAllRentedInstruments() throws InstrumentException {
         try {
             return rentalDb.findAllRentedInstruments();
@@ -80,6 +83,12 @@ public class Controller {
         }
     }
 
+    /**
+     * Terminates a rental
+     *
+     * @throws RejectedException If unable to terminate rental.
+     *
+     */
     public void terminateRental(int rentalId) throws RejectedException {
         try {
             rentalDb.updateRental(rentalId);
@@ -89,19 +98,16 @@ public class Controller {
     }
 
     /**
-     * Lists all accounts owned by the specified account holder.
+     * Lists all instruments of a specific type
      * 
-     * @param instrumentType The holder who's accounts shall be listed.
-     * @return A list with all accounts owned by the specified holder. The list is
-     *         empty if the holder does not have any accounts, or if there is no
-     *         such holder.
-     * @throws InstrumentException If unable to retrieve the holder's accounts.
+     * @param instrumentType The type of instrument
+     * @return A list of all available instruments of that type
+     * @throws InstrumentException If unable to list of instruments
      */
     public List<? extends InstrumentDTO> getAllAvailableInstrumentType(String instrumentType) throws InstrumentException {
         if (instrumentType == null) {
             return new ArrayList<>();
         }
-
         try {
             return instrumentDb.findAvailableInstrumentsOfType(instrumentType);
         } catch (Exception e) {
@@ -109,22 +115,24 @@ public class Controller {
         }
     }
 
-    public void rentInstrument(int studentId, int instrumentId) throws InstrumentException {
-        List<? extends InstrumentDTO> availableInstruments = getAllAvailableInstruments(true);
+    /**
+     * Student rents instrument
+     *
+     * @param studentId the id of the student
+     * @param instrumentId the id of the instrument to be rented
+     * @throws RejectedException If unable to rent instrument.
+     */
+    public void rentInstrument(int studentId, int instrumentId) throws RejectedException, SoundgoodDBException {
+        List<? extends InstrumentDTO> availableInstruments;
+        String failureMsg = "Failed to create rental: ";
         try {
             availableInstruments = instrumentDb.findAllAvailableInstruments(true);
             RentalDTO rental = new Rental(studentId, instrumentId, availableInstruments);
             rentalDb.createRental(rental.getStudentId(), rental.getInstrumentId());
         } catch (SoundgoodDBException | RejectedException e) {
-            throw new RuntimeException(e);
+            instrumentDb.commit();
+            throw new RejectedException(failureMsg,e);
         }
     }
 
-    private void commitOngoingTransaction(String failureMsg) throws InstrumentException {
-        try {
-            instrumentDb.commit();
-        } catch (SoundgoodDBException bdbe) {
-            throw new InstrumentException(failureMsg, bdbe);
-        }
-    }
 }

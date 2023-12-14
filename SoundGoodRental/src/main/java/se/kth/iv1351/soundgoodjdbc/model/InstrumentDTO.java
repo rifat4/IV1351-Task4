@@ -24,7 +24,7 @@
 package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
- * Specifies a read-only view of an account.
+ * Specifies a read-only view of an instrument.
  */
 public interface InstrumentDTO {
     /**

@@ -24,7 +24,7 @@
 package se.kth.iv1351.soundgoodjdbc.model;
 
 /**
- * Thrown when deposit or withdrawal fails.
+ * Thrown when renting an instrument is rejefcted
  */
 public class RejectedException extends Exception {
 

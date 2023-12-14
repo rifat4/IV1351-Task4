@@ -27,10 +27,10 @@ package se.kth.iv1351.soundgoodjdbc.model;
  * An account in the bank.
  */
 public class Instrument implements InstrumentDTO {
-    private int instrumentPrice;
-    private String instrumentType;
-    private String instrumentBrand;
-    private int instrumentID;
+    private final int instrumentPrice;
+    private final String instrumentType;
+    private final String instrumentBrand;
+    private final int instrumentID;
 
 
     /**
