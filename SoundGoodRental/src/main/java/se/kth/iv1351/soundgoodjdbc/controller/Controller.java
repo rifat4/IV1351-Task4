@@ -123,16 +123,15 @@ public class Controller {
      * @throws RejectedException If unable to rent instrument.
      * @throws SoundgoodDBException If we get a database exception.
      */
-    public void rentInstrument(int studentId, int instrumentId) throws RejectedException, SoundgoodDBException {
+    public void rentInstrument(int studentId, int instrumentId) throws SoundgoodDBException {
         List<? extends InstrumentDTO> availableInstruments;
+        InstrumentDTO instrument;
         String failureMsg = "Failed to create rental: ";
         try {
-            availableInstruments = instrumentDb.findAllAvailableInstruments(true);
-            RentalDTO rental = new Rental(studentId, instrumentId, availableInstruments);
-            rentalDb.createRental(rental.getStudentId(), rental.getInstrumentId());
-        } catch (SoundgoodDBException | RejectedException e) {
-            instrumentDb.commit();
-            throw new RejectedException(failureMsg,e);
+            instrument = instrumentDb.findInstrument(instrumentId);
+            rentalDb.createRental(studentId, instrument.getInstrumentID());
+        } catch (SoundgoodDBException e) {
+            throw new SoundgoodDBException(failureMsg, e);
         }
     }
 

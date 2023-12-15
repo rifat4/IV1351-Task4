@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.kth.iv1351.soundgoodjdbc.model.Instrument;
+import se.kth.iv1351.soundgoodjdbc.model.InstrumentDTO;
 import se.kth.iv1351.soundgoodjdbc.model.InstrumentException;
 
 /**
@@ -56,6 +57,7 @@ public class InstrumentDAO {
     private PreparedStatement findAvailableInstrumentOfTypeStmt;
     private PreparedStatement findAllAvailableInstrumentsStmt;
     private PreparedStatement findAllAvailableInstrumentsForUpdateStmt;
+    private PreparedStatement findInstrumentWithIdStmt;
 
     /**
      * Constructs a new DAO object connected to the bank database.
@@ -143,6 +145,26 @@ public class InstrumentDAO {
         return instruments;
     }
 
+    public InstrumentDTO findInstrument(int instrumentId) throws SoundgoodDBException {
+        String failureMsg = "Could not search for specified instrument.";
+        ResultSet result = null;
+        InstrumentDTO instrument = null;
+        try {
+            findInstrumentWithIdStmt.setInt(1, instrumentId);
+            result = findInstrumentWithIdStmt.executeQuery();
+            result.next();
+            instrument = new Instrument(result.getString(INSTRUMENT_BRAND),
+                    result.getString(INSTRUMENT_TYPE_NAME),
+                    result.getInt(INSTRUMENT_PRICE),
+                    result.getInt(INSTRUMENT_K));
+        } catch (SQLException sqle) {
+            handleException(failureMsg, sqle);
+        } finally {
+            closeResultSet(failureMsg, result);
+        }
+        return instrument;
+    }
+
     private void prepareStatements() throws SQLException {
 
         findAvailableInstrumentOfTypeStmt = connection.prepareStatement(
@@ -176,6 +198,20 @@ public class InstrumentDAO {
                         ")" +
                         " SELECT * FROM cte" +
                         " FOR UPDATE;");
+
+        findInstrumentWithIdStmt = connection.prepareStatement(
+                "WITH cte AS (\n" +
+                        "    SELECT t1.instrument_id, it.name, ids.brand, ids.price\n" +
+                        "    FROM instruments AS t1\n" +
+                        "    LEFT JOIN instrument_type AS it ON t1.instrument_type_id = it.instrument_type_id\n" +
+                        "    LEFT JOIN instrument_details AS ids ON t1.instrument_details_id = ids.instrument_details_id\n" +
+                        "    LEFT JOIN rented_instrument AS ri ON t1.instrument_id = ri.instrument_id AND ri.rental_end_time IS NULL\n" +
+                        "    WHERE ri.instrument_id IS NULL AND t1.instrument_id = (?)\n" +
+                        ")\n" +
+                        "SELECT *\n" +
+                        "FROM cte\n" +
+                        "FOR UPDATE;");
+
     }
 
     private void handleException(String failureMsg, Exception cause) throws SoundgoodDBException {
@@ -194,19 +230,6 @@ public class InstrumentDAO {
         }
     }
 
-    /**
-     * Commits the current transaction.
-     *
-     * @throws SoundgoodDBException If unable to commit the current transaction.
-     */
-    public void commit() throws SoundgoodDBException {
-        try {
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Failed to commit", e);
-        }
-    }
-
     private void closeResultSet(String failureMsg, ResultSet result) throws SoundgoodDBException {
         try {
             result.close();
@@ -214,4 +237,6 @@ public class InstrumentDAO {
             throw new SoundgoodDBException(failureMsg + " Could not close result set.", e);
         }
     }
+
+
 }
